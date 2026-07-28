@@ -32,6 +32,9 @@ def to_prose(text: str) -> str:
     text = re.sub(r"\{\{.*?\}\}", "", text, flags=re.DOTALL)  # {{ macro(...) }} templates
     text = re.sub(r"\{%.*?%\}", "", text, flags=re.DOTALL)    # {% ... %} jinja statements
     text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)   # HTML comments
+    text = re.sub(r"^\s*\|.*\|\s*$", "", text, flags=re.MULTILINE)  # markdown table rows - not narrative prose
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)      # markdown links: keep visible text, drop the URL
+    text = re.sub(r"https?://\S+", "", text)                  # bare URLs
     text = re.sub(r"`([^`]*)`", r"\1", text)                  # inline code: drop backticks, keep the word
     return text
 

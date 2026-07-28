@@ -1,0 +1,4 @@
+# Only needed for explore_polars.ipynb - the core library (../requirements.txt)
+# has no visualization dependency.
+seaborn
+matplotlib

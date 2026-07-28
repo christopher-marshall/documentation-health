@@ -1,26 +1,23 @@
 # documentation-health
 
-Per-page documentation health metrics for any docs-as-code project (docs stored
-as Markdown/MDX in the repo, so git history maps cleanly to doc pages).
+Per-page documentation health metrics for any docs-as-code project using Markdown or MDX files.
 
-For each Markdown page under a docs directory, it computes:
+The tool generates the following metrics for each page of documentation:
 
 | Metric | What it captures |
 |---|---|
-| `days_since_update` / `days_since_update_raw` | Staleness, with (`_raw` without) tooling/formatting commits filtered out |
-| `age_days` | Days since the page's first commit |
+| `days_since_update` / `days_since_update_raw` | Staleness with tooling/formatting commits filtered out. `_raw` includes all commits.) |
+| `age_days` | Days since the first commit |
 | `commit_count`, `author_count` | Churn and bus-factor |
-| `last_update_commit_msg` | The commit driving `days_since_update`, so you can eyeball whether it's real content work |
-| `word_count`, `flesch_reading_ease` | Thin/bloated, dense/readable |
-| `code_block_density` | Worked examples per 1000 words |
-| `heading_count`, `heading_max_depth` | Structural completeness |
-| `todo_flag` | Self-declared incompleteness (TODO/WIP/"coming soon") |
-| `internal_link_count` | Connectedness in the doc set |
+| `last_update_commit_msg` | The commit behind `days_since_update`. |
+| `word_count`, `flesch_reading_ease` | Page length and readability. |
+| `code_block_density` | Code blocks per 1000 words. |
+| `heading_count`, `heading_max_depth` | Structural density and complexity. |
+| `todo_flag` | Incompleteness (TODO/WIP/"coming soon") |
+| `internal_link_count` | Measure of interconnectedness. |
 
-It does **not** compute a Diátaxis type (tutorial/how-to/reference/explanation)
-or a composite health score - the former is an editorial judgment call, the
-latter is a weighting decision only you can defend for your own use case. See
-`examples/run_polars_example.py` for a pattern to layer both on top.
+Diátaxis type (tutorial/how-to/reference/explanation) and composite health score are not automatically generated. Apply and calculate based on your own use case. See
+`examples/run_polars_example.py` for an example.
 
 ## Install
 

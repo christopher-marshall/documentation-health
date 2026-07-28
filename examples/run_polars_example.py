@@ -14,11 +14,10 @@ from polars_config import CONFIG
 
 df = extract_docs(Path("polars"), CONFIG)
 
-# Diataxis type (tutorial / how-to / reference / explanation) is a judgment call,
-# not something the library computes - see the brief's own framing of it as
-# "your expertise showing." polars_diataxis_types.csv only labels the 14 pages
-# under expressions/ as a worked sample; label the rest by hand before relying
-# on this column for a full run.
+# Diataxis type is subjetive and requires manual review. polars_diataxis_types.csv
+# covers all pages under user-guide/: the 14 under expressions/ were read and
+# labeled by hand, the rest were seeded by suggest_diataxis.py and haven't been
+# reviewed - don't treat those as ground truth without checking them yourself.
 diataxis = pd.read_csv(Path(__file__).parent / "polars_diataxis_types.csv")
 df = df.merge(diataxis, on="path", how="left")
 

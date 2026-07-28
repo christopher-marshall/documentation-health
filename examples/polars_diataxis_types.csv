@@ -1,0 +1,15 @@
+path,diataxis_type
+docs/source/user-guide/expressions/casting.md,explanation
+docs/source/user-guide/expressions/structs.md,explanation
+docs/source/user-guide/expressions/window-functions.md,explanation
+docs/source/user-guide/expressions/strings.md,explanation
+docs/source/user-guide/expressions/categorical-data-and-enums.md,explanation
+docs/source/user-guide/expressions/numpy-functions.md,explanation
+docs/source/user-guide/expressions/expression-expansion.md,explanation
+docs/source/user-guide/expressions/missing-data.md,explanation
+docs/source/user-guide/expressions/aggregation.md,explanation
+docs/source/user-guide/expressions/folds.md,explanation
+docs/source/user-guide/expressions/index.md,explanation
+docs/source/user-guide/expressions/basic-operations.md,explanation
+docs/source/user-guide/expressions/user-defined-python-functions.md,explanation
+docs/source/user-guide/expressions/lists-and-arrays.md,explanation

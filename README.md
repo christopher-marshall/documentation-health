@@ -1,6 +1,6 @@
 # Documentation health dashboard
 
-TEST Per-page documentation health metrics for any docs-as-code project that uses
+Per-page documentation health metrics for any docs-as-code project that uses
 Markdown or MDX files.
 
 DocHealth generates the following metrics for each page of documentation:

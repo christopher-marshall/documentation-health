@@ -19,13 +19,25 @@ DocHealth generates the following metrics for each page of documentation:
 
 Diátaxis type (tutorial/how-to/reference/explanation) and composite health
 score are not automatically generated. Apply and calculate based on your own
-use case. See `examples/run_polars_example.py` for an example.
+use case. See "Quickstart" below to try it end to end, or
+`examples/run_polars_example.py` for the same thing via the Python API.
 
 ## Install
 
 dochealth is a normal installable package - it doesn't need to be cloned
-alongside (or inside) the repo you're analyzing. Install it once, then point
-it at any docs-as-code repo wherever it actually lives on disk:
+alongside (or inside) the repo you're analyzing. It's a CLI tool first, so
+[pipx](https://pipx.pypa.io) is the recommended way to install it: pipx keeps
+the tool in its own isolated environment but puts the `dochealth` command on
+your PATH globally, so you don't need to create or activate a venv just to run
+it against some other repo.
+
+```
+pipx install "documentation-health[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
+```
+
+If you want the **Python API** (`from dochealth import extract_docs`) inside
+your own project instead of just the CLI, pipx won't help - it only exposes
+the command, not the importable package. Use pip, into that project's own venv:
 
 ```
 pip install git+https://github.com/christopher-marshall/documentation-health
@@ -38,6 +50,27 @@ pip install "documentation-health[dashboard] @ git+https://github.com/christophe
 matches the two and errors if they don't agree.)
 
 Developing on this repo itself: `pip install -e ".[dashboard]"` from a checkout.
+
+## Quickstart
+
+End-to-end example against Polars' own docs, using the config already worked
+out in `examples/polars_config.py`:
+
+```
+git clone https://github.com/pola-rs/polars
+
+# examples/polars_config.py already exists for this exact repo. If you have a
+# local checkout of documentation-health, point --config at it directly. If
+# you installed via pipx/pip and have no checkout, grab just that file:
+curl -O https://raw.githubusercontent.com/christopher-marshall/documentation-health/main/examples/polars_config.py
+curl -O https://raw.githubusercontent.com/christopher-marshall/documentation-health/main/examples/polars_diataxis_types.csv
+
+dochealth extract polars --config polars_config.py --diataxis-csv polars_diataxis_types.csv --out metrics.csv
+dochealth dashboard metrics.csv
+```
+
+For your own docs repo: same shape, but skip the `curl` step and write your
+own config instead - see "Write a config for a new repo" below.
 
 ## Use
 

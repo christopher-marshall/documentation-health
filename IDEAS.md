@@ -53,14 +53,29 @@ updated automatically as things change.
 
 ## Dashboard
 
-- **`app.py`'s own three TODO comments were never built into `app.py` itself**
-  - Diátaxis coverage (counts + staleness by type), a readability-vs-length
-  scatter, and a written narrative summary panel. All three *were* built, but
-  only in `app-alt.py` - which was explicitly framed as a side-by-side
-  comparison build, not a replacement. Open decision, not yet made: merge
-  `app-alt.py`'s completed pieces back into the canonical `app.py`, keep both
-  permanently as two different structural takes, or pick one as canonical and
-  retire the other.
+`app.py`'s three chart/narrative TODOs (Diátaxis coverage, readability-vs-length
+scatter, written narrative panel) are now merged in from `app-alt.py`, along
+with its tabbed layout. Two pieces were deliberately left out of that merge -
+`app.py` keeps its own text-input-based CSV/config entry instead:
+
+- **Drag-and-drop CSV upload** (`app-alt.py`'s `st.file_uploader`, instead of
+  `app.py`'s typed path). Not ported because it would break the CLI CSV
+  passthrough - `dochealth dashboard metrics.csv` works by pre-filling a
+  `text_input`'s default value from `sys.argv`, and there's no equivalent way
+  to pre-select a file into an `st.file_uploader` from a server-side path.
+  Worth revisiting if the CLI passthrough ever gets redesigned, or as an
+  additional (not replacement) input method.
+- **Dropdown config picker** (`app-alt.py`'s `glob.glob("examples/*_config.py")`,
+  instead of `app.py`'s free-text path). Not ported because it only finds
+  configs sitting in a relative `examples/` folder next to wherever Streamlit
+  was launched - that's exactly the "config must live inside my tool's folder"
+  assumption the CLI/packaging rework was built to remove. If this gets
+  revisited, it'd need to glob somewhere user-specified, not a hardcoded
+  `examples/` relative path.
+
+`app-alt.py` itself is left as-is at the repo root (not deleted) - still a
+working standalone comparison build via `streamlit run app-alt.py`, just no
+longer the only place the charts/narrative exist.
 
 ## Explicitly out of scope (context, not open items)
 

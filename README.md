@@ -23,15 +23,33 @@ use case. See `examples/run_polars_example.py` for an example.
 
 ## Install
 
+dochealth is a normal installable package - it doesn't need to be cloned
+alongside (or inside) the repo you're analyzing. Install it once, then point
+it at any docs-as-code repo wherever it actually lives on disk:
+
 ```
-pip install -r requirements.txt
+pip install git+https://github.com/christopher-marshall/documentation-health
+# or, for the dashboard too:
+pip install "dochealth[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
 ```
+
+Developing on this repo itself: `pip install -e ".[dashboard]"` from a checkout.
 
 ## Use
 
+**CLI** - extract metrics from a repo you've already cloned, using a config
+file that can live anywhere (see "Write a config for a new repo" below):
+
+```
+dochealth extract path/to/cloned/repo --config path/to/your_config.py --out metrics.csv
+dochealth dashboard metrics.csv
+```
+
+**Python API** - the same thing, in code:
+
 ```python
 from pathlib import Path
-from doc_health import extract_docs
+from dochealth import extract_docs
 
 config = {
     "docs_glob": "docs/source/user-guide",   # path under the repo to search for *.md
@@ -44,6 +62,11 @@ df = extract_docs(Path("path/to/cloned/repo"), config)
 ```
 
 ## Write a config for a new repo
+
+A config is a plain Python file with a module-level `CONFIG = {...}` dict (see
+`examples/polars_config.py`) - required whether you load it yourself for the
+Python API or hand its path to `dochealth extract --config`. It can live
+anywhere; a natural place is right inside the docs repo it configures.
 
 Not everything generalises between documentation sets. Review your target docs
 and adjust the following configuration options manually:

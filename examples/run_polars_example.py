@@ -1,18 +1,21 @@
-"""Worked example: run doc_health against a local clone of Polars.
+"""Worked example: run dochealth against a local clone of Polars.
 
-    git clone https://github.com/pola-rs/polars
+    pip install -e .                 # from the repo root, once
+    git clone https://github.com/pola-rs/polars examples/polars
     python examples/run_polars_example.py
+
+Equivalent one-liner via the CLI, from anywhere:
+    dochealth extract path/to/polars --config examples/polars_config.py \\
+        --diataxis-csv examples/polars_diataxis_types.csv
 """
-import sys
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from doc_health import extract_docs
+from dochealth import extract_docs
 from polars_config import CONFIG
 
-df = extract_docs(Path("polars"), CONFIG)
+df = extract_docs(Path(__file__).parent / "polars", CONFIG)
 
 # Diataxis type is subjective and requires manual review. polars_diataxis_types.csv
 # covers all pages under user-guide/: the 14 under expressions/ were read and

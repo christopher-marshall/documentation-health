@@ -15,8 +15,9 @@ small multiples instead of a 4-way categorical scatter (Diátaxis has 4 types,
 over the palette's 3-slot all-pairs cap for scatter/bubble forms), hairline
 recessive gridlines, and no dual axes.
 
-Run:
-    pip install -r requirements.txt -r requirements-app.txt
+Run (from a checkout of this repo - unlike app.py, this comparison build has no
+CLI wrapper of its own):
+    pip install -e ".[dashboard]"
     streamlit run app-alt.py
 
 Data source (pick in the sidebar):
@@ -68,7 +69,7 @@ def load_csv_bytes(raw: bytes) -> pd.DataFrame:
 
 @st.cache_data
 def run_extract(repo_path: str, config_module: str, diataxis_csv: str | None) -> pd.DataFrame:
-    from doc_health import extract_docs  # imported here so the app still starts if deps are missing
+    from dochealth import extract_docs  # imported here so the app still starts if deps are missing
 
     spec = importlib.util.spec_from_file_location("_dochealth_config_alt", config_module)
     module = importlib.util.module_from_spec(spec)

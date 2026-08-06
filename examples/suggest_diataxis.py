@@ -8,11 +8,9 @@ Usage:
 """
 import csv
 import re
-import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from doc_health import HEADING_ANCHOR_RE, TITLE_RE, to_prose
+from dochealth.core import HEADING_ANCHOR_RE, TITLE_RE, to_prose
 
 TUTORIAL_HINTS = re.compile(r"\b(getting started|quickstart|quick start|your first|introduction to|tutorial)\b", re.IGNORECASE)
 HOWTO_HINTS = re.compile(r"^(how to|installing?|configuring|deploying|migrating|upgrading|setting up|using)\b", re.IGNORECASE)

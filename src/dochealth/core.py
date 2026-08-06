@@ -4,7 +4,8 @@ Git-log parsing, prose/word-count/heading/link/TODO metrics are the same across
 any docs-as-code project and live here. Everything that varies by project - what
 a "noise" commit looks like, how that project embeds code examples - is supplied
 by the caller as a config dict (see examples/ for two worked configs) rather than
-hardcoded here.
+hardcoded here. Public entry point is extract_docs(); re-exported as
+dochealth.extract_docs.
 """
 import re
 import subprocess

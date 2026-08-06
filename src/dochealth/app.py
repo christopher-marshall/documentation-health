@@ -5,16 +5,18 @@ sidebar filters over extract_docs() output. Build the rest (charts, Diátaxis
 coverage, the written narrative panel) on top of this.
 
 Run:
-    pip install -r requirements.txt -r requirements-app.txt
-    streamlit run app.py
+    dochealth dashboard [metrics.csv]      # preferred - installs with the package
+    streamlit run src/dochealth/app.py     # or directly, from a checkout of this repo
 
 Data source (pick in the sidebar):
   1. Sample data  — synthetic rows so the app renders with zero setup (default).
   2. Metrics CSV  — a file you saved earlier with extract_docs(...).to_csv("metrics.csv").
+                    Preloaded automatically if you ran `dochealth dashboard metrics.csv`.
   3. Live extract — point at a cloned repo + a config module (e.g. examples/polars_config.py);
                     runs extract_docs() directly. Slower (one git call per page), cached per run.
 """
 import importlib.util
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +24,11 @@ import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Documentation Health", layout="wide")
+
+# `dochealth dashboard metrics.csv` launches this via `streamlit run ... -- metrics.csv`,
+# which Streamlit forwards straight into sys.argv - so this is set only when the CLI
+# passed a CSV, never when running `streamlit run app.py` directly.
+_cli_csv = sys.argv[1] if len(sys.argv) > 1 else None
 
 # Columns extract_docs() produces, so the sample and the real thing share a shape.
 METRIC_COLS = [
@@ -43,7 +50,7 @@ def load_csv(path: str) -> pd.DataFrame:
 @st.cache_data
 def run_extract(repo_path: str, config_module: str, diataxis_csv: str | None) -> pd.DataFrame:
     """Import a config module by path, run extract_docs(), optionally merge Diátaxis labels."""
-    from doc_health import extract_docs  # imported here so the app still starts if deps are missing
+    from dochealth import extract_docs  # imported here so the app still starts if deps are missing
 
     spec = importlib.util.spec_from_file_location("_dochealth_config", config_module)
     module = importlib.util.module_from_spec(spec)
@@ -98,14 +105,16 @@ def section_of(path: str) -> str:
 # Sidebar: data source + filters
 # --------------------------------------------------------------------------- #
 st.sidebar.title("Documentation Health")
-source = st.sidebar.radio("Data source", ["Sample data", "Metrics CSV", "Live extract"])
+sources = ["Sample data", "Metrics CSV", "Live extract"]
+source = st.sidebar.radio("Data source", sources, index=sources.index("Metrics CSV") if _cli_csv else 0)
 
 if source == "Metrics CSV":
-    csv_path = st.sidebar.text_input("Path to metrics CSV", "metrics.csv")
+    csv_path = st.sidebar.text_input("Path to metrics CSV", _cli_csv or "metrics.csv")
     df = load_csv(csv_path) if csv_path and Path(csv_path).exists() else pd.DataFrame()
     if df.empty:
         st.warning(f"No CSV found at `{csv_path}`. Save one with "
-                   "`extract_docs(...).to_csv('metrics.csv', index=False)`.")
+                   "`extract_docs(...).to_csv('metrics.csv', index=False)`, or with "
+                   "`dochealth extract <repo> --config <config.py> --out metrics.csv`.")
         st.stop()
 elif source == "Live extract":
     repo_path = st.sidebar.text_input("Cloned repo path", "polars")

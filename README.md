@@ -30,8 +30,12 @@ it at any docs-as-code repo wherever it actually lives on disk:
 ```
 pip install git+https://github.com/christopher-marshall/documentation-health
 # or, for the dashboard too:
-pip install "dochealth[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
+pip install "documentation-health[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
 ```
+
+(The name before `@` has to be the *distribution* name from `pyproject.toml`
+- `documentation-health` - not the importable package name `dochealth`; pip
+matches the two and errors if they don't agree.)
 
 Developing on this repo itself: `pip install -e ".[dashboard]"` from a checkout.
 

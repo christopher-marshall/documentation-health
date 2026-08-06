@@ -7,7 +7,7 @@ DocHealth generates the following metrics for each page of documentation:
 
 | Metric | What it captures |
 |---|---|
-| `days_since_update` / `days_since_update_raw` | Staleness with tooling/formatting commits filtered out. `_raw` includes all commits. |
+| `days_since_update` / `days_since_update_raw` | Staleness with no-op renames and tooling/formatting commits filtered out. `_raw` includes all commits. |
 | `age_days` | Days since the first commit |
 | `commit_count`, `author_count` | Churn and bus-factor |
 | `last_update_commit_msg` | The commit behind `days_since_update`. |
@@ -49,15 +49,20 @@ Not everything generalises between documentation sets. Review your target docs
 and adjust the following configuration options manually:
 
 * **`noise_commit_re`**:
-    * Repo-wide formatting/tooling commits (a linter config change, a mass
-      reformat) touch many unrelated doc pages in one commit with no real
-      content edit. Left unfiltered, they make every page they touch look
-      falsely "fresh."
+    * Two kinds of commit can make a page look falsely "fresh" without a real
+      content edit: a pure rename/move (a directory reshuffle) and a
+      repo-wide formatting/tooling pass (a linter config change, a mass
+      reformat). `extract_docs()` drops the first kind automatically - it
+      reads `git log --numstat` per file and excludes any commit with zero
+      net line changes for that file, no config needed. `noise_commit_re`
+      only needs to cover the second kind: commits that *did* change lines,
+      but only cosmetically.
     * Find noisy commits by sorting pages by `days_since_update` and reading
       `last_update_commit_msg` for the ones that all show the same value. If
       several unrelated pages share one commit, check what it actually did
-      (`git show --stat <hash>`) and add its keyword to the regex if it's
-      noise.
+      (`git show --stat <hash>`) - if it's a pure rename you don't need to do
+      anything, that's already handled; if it's a real-but-cosmetic edit
+      (formatting, linting), add its keyword to the regex.
 * **`example_patterns` / `fence_mode`**:
     * How a project embeds worked code examples varies a lot: a template macro
       that pulls source from an external file, a bare include directive with

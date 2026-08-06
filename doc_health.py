@@ -75,6 +75,39 @@ def count_examples(text: str, example_patterns: list[re.Pattern], fence_mode: st
     return macro_count + fence_count
 
 
+def _file_history(repo_path: Path, rel_path: str) -> list[tuple[str, str, str, int, int]]:
+    """One row per commit touching this file: (date, author, subject, lines_added, lines_deleted).
+
+    Line counts come from --numstat. A pure rename/move with identical content
+    (e.g. a directory reshuffle) shows 0/0 - that's what tells it apart from a
+    commit that actually edited the file, without needing to guess from the
+    commit message.
+    """
+    out = subprocess.run(
+        ["git", "-C", str(repo_path), "log", "--follow", "--numstat",
+         "--format=COMMIT|%aI|%an|%s", "--", rel_path],
+        capture_output=True, text=True).stdout.splitlines()
+
+    commits = []
+    date = author = subject = None
+    added = deleted = 0
+    for line in out:
+        if line.startswith("COMMIT|"):
+            if date is not None:
+                commits.append((date, author, subject, added, deleted))
+            _, date, author, subject = line.split("|", 3)
+            added = deleted = 0
+        elif line.strip():
+            a_str, d_str, *_ = line.split("\t")
+            # Binary files report "-" for both counts; treat as a real change
+            # rather than guess it's a no-op rename.
+            added += int(a_str) if a_str.isdigit() else 1
+            deleted += int(d_str) if d_str.isdigit() else 1
+    if date is not None:
+        commits.append((date, author, subject, added, deleted))
+    return commits
+
+
 def extract_docs(repo_path: Path, config: dict) -> pd.DataFrame:
     """Build the per-page metrics table for one docs-as-code repo.
 
@@ -82,9 +115,10 @@ def extract_docs(repo_path: Path, config: dict) -> pd.DataFrame:
       docs_glob        - path under repo_path to search for *.md files, e.g. "docs".
       noise_commit_re   - compiled regex matched against commit subjects; commits
                           that match are excluded from staleness/churn/authorship
-                          (formatter/tooling commits that touch many files at once
-                          without real content edits - see README for how to find
-                          these for a new repo).
+                          on top of the automatic pure-rename filter (see
+                          _file_history) - this is for commits that DID change
+                          lines but only cosmetically (a repo-wide reformat) -
+                          see README for how to find these for a new repo.
       example_patterns  - list of compiled regexes, see count_examples().
       fence_mode        - "paired" or "plain", see count_examples().
     """
@@ -95,18 +129,20 @@ def extract_docs(repo_path: Path, config: dict) -> pd.DataFrame:
 
     rows = []
     for f in docs:
-        log = subprocess.run(
-            ["git", "-C", str(repo_path), "log", "--follow", "--format=%aI|%an|%s", "--", str(f.relative_to(repo_path))],
-            capture_output=True, text=True).stdout.splitlines()
-        if not log:
+        commits = _file_history(repo_path, str(f.relative_to(repo_path)))
+        if not commits:
             continue
 
-        commits = [line.split("|", 2) for line in log]
         last_raw = datetime.fromisoformat(commits[0][0])
 
-        content_commits = [(d, a, s) for d, a, s in commits if not noise_commit_re.search(s)]
+        content_commits = [
+            (d, a, s) for d, a, s, added, deleted in commits
+            if (added + deleted) > 0 and not noise_commit_re.search(s)
+        ]
         if not content_commits:
-            content_commits = commits  # every commit was noise - fall back to raw log
+            # Every commit was noise (rename and/or keyword) - fall back to raw log
+            # rather than report no history at all for a file that does have some.
+            content_commits = [(d, a, s) for d, a, s, _, _ in commits]
 
         dates, authors, subjects = zip(*content_commits)
         last, first = datetime.fromisoformat(dates[0]), datetime.fromisoformat(dates[-1])

@@ -1,0 +1,4 @@
+# Streamlit dashboard (app.py) only. The core library deps live in
+# ../requirements.txt (pandas, textstat); install both to run app.py:
+#   pip install -r requirements.txt -r requirements-app.txt
+streamlit

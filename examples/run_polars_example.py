@@ -14,7 +14,7 @@ from polars_config import CONFIG
 
 df = extract_docs(Path("polars"), CONFIG)
 
-# Diataxis type is subjetive and requires manual review. polars_diataxis_types.csv
+# Diataxis type is subjective and requires manual review. polars_diataxis_types.csv
 # covers all pages under user-guide/: the 14 under expressions/ were read and
 # labeled by hand, the rest were seeded by suggest_diataxis.py and haven't been
 # reviewed - don't treat those as ground truth without checking them yourself.

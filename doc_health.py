@@ -17,7 +17,10 @@ import textstat
 TITLE_RE = re.compile(r"^#\s+(.+)", re.MULTILINE)
 HEADING_RE = re.compile(r"^(#{1,6})\s+.+", re.MULTILINE)
 TODO_RE = re.compile(r"\b(TODO|WIP|coming soon)\b", re.IGNORECASE)
-INTERNAL_LINK_RE = re.compile(r"\[[^\]]*\]\((?!https?://)[^)]+\)")
+# Internal page links only: markdown links to a relative target. The (?<!!) drops
+# image embeds (![alt](img.png)), and the lookahead drops external URLs, mailto:
+# links, and same-page anchors (#section) - none of which are links to another page.
+INTERNAL_LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\((?!https?://|mailto:|#)[^)]+\)")
 FENCE_LINE_RE = re.compile(r"^```(.*)$", re.MULTILINE)
 
 # mkdocs-material attr_list permalink syntax, e.g. "# OAuth2 scopes { #oauth2-scopes }".
@@ -36,6 +39,17 @@ def to_prose(text: str) -> str:
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)      # markdown links: keep visible text, drop the URL
     text = re.sub(r"https?://\S+", "", text)                  # bare URLs
     text = re.sub(r"`([^`]*)`", r"\1", text)                  # inline code: drop backticks, keep the word
+    return text
+
+
+def strip_code(text: str) -> str:
+    """Remove code (fenced + inline) but keep everything else - including HTML
+    comments. Used for todo_flag: a TODO inside a documented code sample is the
+    example's, not the writer's, while writers often park real TODO/WIP notes in
+    HTML comments (which to_prose strips, so prose is the wrong source here).
+    """
+    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)  # fenced code blocks
+    text = re.sub(r"`[^`]*`", "", text)                     # inline code spans (drop contents too)
     return text
 
 
@@ -115,11 +129,14 @@ def extract_docs(repo_path: Path, config: dict) -> pd.DataFrame:
             "commit_count": len(content_commits),
             "author_count": len(set(authors)),
             "word_count": word_count,
-            "flesch_reading_ease": textstat.flesch_reading_ease(prose),
+            # None, not 0.0: textstat returns 0.0 for empty prose, which reads as
+            # "extremely hard to read" rather than "no prose to score" (e.g. a pure
+            # reference stub that is all table/code). None keeps it out of the stats.
+            "flesch_reading_ease": textstat.flesch_reading_ease(prose) if word_count else None,
             "code_block_density": (example_count / word_count * 1000) if word_count else 0,
             "heading_count": len(heading_levels),
             "heading_max_depth": max(heading_levels) if heading_levels else 0,
-            "todo_flag": bool(TODO_RE.search(text)),
+            "todo_flag": bool(TODO_RE.search(strip_code(text))),
             "internal_link_count": len(INTERNAL_LINK_RE.findall(text)),
         })
 

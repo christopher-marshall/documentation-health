@@ -32,7 +32,7 @@ your PATH globally, so you don't need to create or activate a venv just to run
 it against some other repo.
 
 ```
-pipx install "documentation-health[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
+pipx install "dochealth[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
 ```
 
 If you want the **Python API** (`from dochealth import extract_docs`) inside
@@ -42,12 +42,12 @@ the command, not the importable package. Use pip, into that project's own venv:
 ```
 pip install git+https://github.com/christopher-marshall/documentation-health
 # or, for the dashboard too:
-pip install "documentation-health[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
+pip install "dochealth[dashboard] @ git+https://github.com/christopher-marshall/documentation-health"
 ```
 
 (The name before `@` has to be the *distribution* name from `pyproject.toml`
-- `documentation-health` - not the importable package name `dochealth`; pip
-matches the two and errors if they don't agree.)
+- `dochealth` - which now matches the importable package name too, along
+with the CLI command; only the repo URL itself is still `documentation-health`.)
 
 Developing on this repo itself: `pip install -e ".[dashboard]"` from a checkout.
 

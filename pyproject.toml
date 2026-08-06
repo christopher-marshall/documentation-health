@@ -1,5 +1,5 @@
 [project]
-name = "documentation-health"
+name = "dochealth"
 version = "0.1.0"
 description = "Per-page documentation health metrics for docs-as-code repos"
 readme = "README.md"
